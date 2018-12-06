@@ -165,6 +165,46 @@ control MyIngress(inout headers hdr,
         default_action = drop();
     }
 
+    //=========================
+	//action and table for simple mirroring
+	action DoMirror(bit<32> mirror_id, macAddr_t dstAddr, egressSpec_t egress_port, bit<16> dst_id) {
+		hdr.myTunnel.dst_id = dst_id;
+        standard_metadata.egress_spec = egress_port;
+        //hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+        hdr.ethernet.dstAddr = dstAddr;
+		standard_metadata.clone_spec = mirror_id;
+		clone(CloneType.I2E, mirror_id);
+	}
+		
+    table table_mirror {
+    	key = {
+			standard_metadata.ingress_port : exact;
+    	}
+    	actions = {
+    		NoAction; 
+			DoMirror;
+    	}
+    	default_action = NoAction();
+    }
+	
+	//table for 5 tuple match
+	/**table table_mirror_5tuple{
+        key = { 
+			headers.ip.v4.src_addr : ternary;
+			headers.ip.v4.dst_addr : ternary;
+			headers.ip.v4.protocol : ternary;
+			headers.tcp.src_port : ternary;
+			headers.tcp.dst_port : ternary;
+        }
+        actions = {
+    		NoAction; 
+			DoMirror;
+    	}
+    	default_action = NoAction();
+	}*/
+	
+	//===========================
+	
     apply {
         if (hdr.ipv4.isValid() && !hdr.myTunnel.isValid()) {
             // Process only non-tunneled IPv4 packets.
@@ -175,6 +215,7 @@ control MyIngress(inout headers hdr,
             // Process all tunneled packets.
             myTunnel_exact.apply();
         }
+		table_mirror.apply();
     }
 }
 
