@@ -9,6 +9,9 @@ from scapy.all import sendp, send, get_if_list, get_if_hwaddr
 from scapy.all import Packet
 from scapy.all import Ether, IP, UDP, TCP
 
+
+host_name_to_ip_dic = {"h1": "10.0.1.1", "h2": "10.0.2.2", "h3": "10.0.3.3"}
+
 def get_if():
     ifs=get_if_list()
     iface=None # "h1-eth0"
@@ -27,7 +30,10 @@ def main():
         print 'pass 2 arguments: <destination> "<message>"'
         exit(1)
 
-    addr = socket.gethostbyname(sys.argv[1])
+    host_name = socket.gethostbyname(sys.argv[1])
+    addr = host_name_to_ip_dic[host_name]
+
+
     iface = get_if()
 
     print "sending on interface %s to %s" % (iface, str(addr))
