@@ -37,7 +37,7 @@ def main():
     except KeyError:
         print("use host name (./send.py h2 message)")
         exit(1)
-    host_name = socket.gethostbyname(host_ip)
+    addr = socket.gethostbyname(host_ip)
     iface = get_if()
 
     print("sending on interface %s to %s" % (iface, str(addr)))
