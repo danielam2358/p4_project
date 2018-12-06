@@ -36,6 +36,7 @@ def main():
         host_ip = host_name_to_ip_dic[sys.argv[1]]
     except KeyError:
         print("use host name (./send.py h2 message)")
+        exit(1)
     host_name = socket.gethostbyname(host_ip)
     iface = get_if()
 
