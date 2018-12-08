@@ -102,14 +102,14 @@ control MyIngress(inout headers hdr,
         clone(CloneType.I2E, session_id);
 
         // the cloned packet.
-        if(standard_metadata.clone_spec == session_id) {
+        if(standard_metadata.clone_spec != 0) {
             standard_metadata.egress_spec = port_2;
             hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
             hdr.ethernet.dstAddr = dstAddr_2;
-            hdr.ipv4.dstAddr = dstAddr_ipv4
+            hdr.ipv4.dstAddr = dstAddr_ipv4;
         }
 
-        // the original packet.
+
         else {
             standard_metadata.egress_spec = port;
             hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
