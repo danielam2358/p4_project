@@ -31,6 +31,7 @@
         "port": 2,
         "dstAddr_2": "00:00:00:03:03:00",
         "port_2": 3,
+        "dstAddr_ipv4": "10.0.3.3",
         "session_id": 1
       }
     },
