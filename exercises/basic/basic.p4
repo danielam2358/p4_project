@@ -98,7 +98,7 @@ control MyIngress(inout headers hdr,
     }
 
         action ipv4_clone_and_forward(macAddr_t dstAddr, egressSpec_t port, macAddr_t dstAddr_2, egressSpec_t port_2,
-                                      bit<32> session_id) {
+                                      ip4Addr_t dstAddr_ipv4, bit<32> session_id) {
         clone(CloneType.I2E, session_id);
 
         // the cloned packet.
@@ -106,10 +106,11 @@ control MyIngress(inout headers hdr,
             standard_metadata.egress_spec = port_2;
             hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
             hdr.ethernet.dstAddr = dstAddr_2;
+            hdr.ipv4.dstAddr = dstAddr_ipv4
         }
 
         // the original packet.
-        if(standard_metadata.clone_spec == 0) {
+        else {
             standard_metadata.egress_spec = port;
             hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
             hdr.ethernet.dstAddr = dstAddr;
