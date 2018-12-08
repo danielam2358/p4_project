@@ -25,10 +25,13 @@
       "match": {
         "hdr.ipv4.dstAddr": ["10.0.2.2", 32]
       },
-      "action_name": "MyIngress.ipv4_forward",
+      "action_name": "MyIngress.ipv4_clone_and_forward",
       "action_params": {
         "dstAddr": "00:00:00:02:02:00",
-        "port": 2
+        "port": 2,
+        "dstAddr_2": "00:00:00:03:03:00",
+        "port_2": 3,
+        "session_id": 1
       }
     },
     {

@@ -96,6 +96,27 @@ control MyIngress(inout headers hdr,
         hdr.ethernet.dstAddr = dstAddr;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
+
+        action ipv4_clone_and_forward(macAddr_t dstAddr, egressSpec_t port, macAddr_t dstAddr_2, egressSpec_t port_2,
+                                      bit<32> session_id) {
+        clone(CloneType.I2E, session_id);
+
+        // the cloned packet.
+        if(standard_metadata.clone_spec == session_id) {
+            standard_metadata.egress_spec = port_2;
+            hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+            hdr.ethernet.dstAddr = dstAddr_2;
+        }
+
+        // the original packet.
+        if(standard_metadata.clone_spec == 0) {
+            standard_metadata.egress_spec = port;
+            hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
+            hdr.ethernet.dstAddr = dstAddr;
+        }
+
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+    }
     
     table ipv4_lpm {
         key = {
@@ -103,6 +124,7 @@ control MyIngress(inout headers hdr,
         }
         actions = {
             ipv4_forward;
+            ipv4_clone_and_forward;
             drop;
             NoAction;
         }
