@@ -138,6 +138,17 @@ control MyIngress(inout headers hdr,
         egressTunnelCounter.count((bit<32>) hdr.myTunnel.dst_id);
     }
 
+        //=========================
+
+	action packet_clone(bit<32> session_id, bit<16> dst_id) {
+		clone(CloneType.I2E, session_id);
+		if(standard_metadata.clone_spec == session_id) {
+                // if clone packet chamge tunnel id.
+                hdr.myTunnel.dst_id = dst_id;
+		 }
+	}
+	//=========================
+
     table ipv4_lpm {
         key = {
             hdr.ipv4.dstAddr: lpm;
@@ -166,56 +177,39 @@ control MyIngress(inout headers hdr,
     }
 
     //=========================
-	//action and table for simple mirroring
-	action DoMirror(bit<32> mirror_id, macAddr_t dstAddr, egressSpec_t egress_port, bit<16> dst_id) {
-		hdr.myTunnel.dst_id = dst_id;
-        standard_metadata.egress_spec = egress_port;
-        //hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-        hdr.ethernet.dstAddr = dstAddr;
-		standard_metadata.clone_spec = mirror_id;
-		clone(CloneType.I2E, mirror_id);
-	}
 		
-    table table_mirror {
-    	key = {
-			standard_metadata.ingress_port : exact;
-    	}
-    	actions = {
-    		NoAction; 
-			DoMirror;
-    	}
-    	default_action = NoAction();
-    }
-	
-	//table for 5 tuple match
-	/**table table_mirror_5tuple{
-        key = { 
-			headers.ip.v4.src_addr : ternary;
-			headers.ip.v4.dst_addr : ternary;
-			headers.ip.v4.protocol : ternary;
-			headers.tcp.src_port : ternary;
-			headers.tcp.dst_port : ternary;
+    table Mirror {
+        key = {
+            hdr.myTunnel.dst_id: exact;
         }
         actions = {
-    		NoAction; 
-			DoMirror;
-    	}
-    	default_action = NoAction();
-	}*/
-	
-	//===========================
+            packet_clone;
+            NoAction;
+        }
+        size = 1024;
+        default_action = NoAction();
+    }
+
+    //===========================
 	
     apply {
+
+
         if (hdr.ipv4.isValid() && !hdr.myTunnel.isValid()) {
             // Process only non-tunneled IPv4 packets.
             ipv4_lpm.apply();
         }
 
         if (hdr.myTunnel.isValid()) {
+
+        //===========================
+            // Mirror all tunneled IPv4 packets.
+            table_mirror.apply();
+        //===========================
+
             // Process all tunneled packets.
             myTunnel_exact.apply();
         }
-		table_mirror.apply();
     }
 }
 
@@ -234,23 +228,7 @@ control MyEgress(inout headers hdr,
 *************************************************************************/
 
 control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
-     apply {
-	update_checksum(
-	    hdr.ipv4.isValid(),
-            { hdr.ipv4.version,
-	      hdr.ipv4.ihl,
-              hdr.ipv4.diffserv,
-              hdr.ipv4.totalLen,
-              hdr.ipv4.identification,
-              hdr.ipv4.flags,
-              hdr.ipv4.fragOffset,
-              hdr.ipv4.ttl,
-              hdr.ipv4.protocol,
-              hdr.ipv4.srcAddr,
-              hdr.ipv4.dstAddr },
-            hdr.ipv4.hdrChecksum,
-            HashAlgorithm.csum16);
-    }
+     apply { }
 }
 
 /*************************************************************************
