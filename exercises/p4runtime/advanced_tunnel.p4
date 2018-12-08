@@ -180,7 +180,7 @@ control MyIngress(inout headers hdr,
 		
     table mirror {
         key = {
-            standard_metadata.ingress_port: exact;
+            standard_metadata.egress_spec: exact;
         }
         actions = {
             packet_clone;
