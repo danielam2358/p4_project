@@ -178,9 +178,9 @@ control MyIngress(inout headers hdr,
 
     //=========================
 		
-    table Mirror {
+    table mirror {
         key = {
-            hdr.myTunnel.dst_id: exact;
+            standard_metadata.ingress_port: exact;
         }
         actions = {
             packet_clone;
@@ -204,7 +204,7 @@ control MyIngress(inout headers hdr,
 
         //===========================
             // Mirror all tunneled IPv4 packets.
-            table_mirror.apply();
+            mirror.apply();
         //===========================
 
             // Process all tunneled packets.

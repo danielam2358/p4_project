@@ -111,17 +111,15 @@ def write_tunnel_rules(p4info_helper, ingress_sw, egress_sw, tunnel_id, dst_eth_
     egress_sw.WriteTableEntry(table_entry)
     print("Installed egress tunnel rule on %s" % egress_sw.name)
 
-# def write_tunnel_rules(p4info_helper, ingress_sw, egress_sw, tunnel_id, dst_eth_addr, dst_ip_addr):
-
 
 def write_mirror_rules(p4info_helper, ingress_sw, egress_sw, ingress_port, tunnel_id, dst_eth_addr, session_id):
     # Mirror Rule.
     table_entry = p4info_helper.buildTableEntry(
-        table_name="MyIngress.table_mirror",
+        table_name="MyIngress.mirror",
         match_fields={
             "standard_metadata.ingress_port": ingress_port
         },
-        action_name="MyIngress.DoMirror",
+        action_name="MyIngress.packet_clone",
         action_params={
             "session_id": session_id,
             "dst_id": tunnel_id
@@ -206,8 +204,8 @@ def main(p4info_file_path, bmv2_file_path):
     write_tunnel_rules(p4info_helper, ingress_sw=s3, egress_sw=s2, tunnel_id=302,
                      dst_eth_addr="00:00:00:00:02:02", dst_ip_addr="10.0.2.2")
     #===================================#
-
-    write_mirror_rules(p4info_helper, sw=s1, mirror_id=0x1, dstAddr="00:00:00:00:01:01", egress_port=0x3, ingress_port=0x2, dst_id=103)
+	
+    write_mirror_rules(p4info_helper, ingress_sw=s1, egress_sw=s3, ingress_port=1, tunnel_id=113, dst_eth_addr="00:00:00:00:03:03", session_id=1)
 
 
 if __name__ == '__main__':
