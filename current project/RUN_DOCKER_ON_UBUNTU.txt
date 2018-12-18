@@ -1,0 +1,23 @@
+
+# docker create a image from tar.
+
+sudo docker load -i ./mlnx-p4rt-build_0.1.14.img.tar.gz
+
+# to see which images are allrady loaded.
+
+sudo docker images  
+
+# to see containers .
+
+sudo docker ps -a  
+
+
+#start run container, -it mean interactive mode.
+
+sudo docker run -it <image-id ot container id> bash
+
+
+#delete container instance.
+
+sudo docker rm -f <container id (from docker ps)>
+
